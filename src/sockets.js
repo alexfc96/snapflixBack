@@ -1,16 +1,20 @@
+const initialWorld = require('./initDefaultGameValues/initialWorld')
+const initialLocations = require('./initDefaultGameValues/initialLocations')
+const initialPlayer = require('./initDefaultGameValues/initialPlayer')
+
+// 1. emparejar players
+// 2. crear partida sólo para 2 players
+// 3. asignar deck y ubicaciones
+// 4. hacer lógica para recibir next step y que este calcule la suma total de las cartas y vuelva a enviar el deck sin las cartas jugadas
+// 5. una vez el turno 6 se complete hacer computo global y finalizar partida.
+// 6. crear diferentes sockets para partidas simultaneas 
+
 module.exports = (io) =>{
 
     let nickNames = [];
 
     io.on('connection', socket =>{
         console.log('Nuevo jugador encontrado');
-
-        // 1. emparejar players
-        // 2. crear partida sólo para 2 players
-        // 3. asignar deck y ubicaciones
-        // 4. hacer lógica para recibir next step y que este calcule la suma total de las cartas y vuelva a enviar el deck sin las cartas jugadas
-        // 5. una vez el turno 6 se complete hacer computo global y finalizar partida.
-        // 6. crear diferentes sockets para partidas simultaneas 
         
         socket.on('new user', (datos, callback) => {
             //Nos devuelve el indice si el dato existe, es decir, si ya existe el nombre de usuario:
@@ -24,7 +28,9 @@ module.exports = (io) =>{
                 nickNames.push(socket.nickname);
                 //Enviamos al cliente el array de usuarios:
                 updateUsers();
-                // createGame();
+                if(nickNames.length == 2){
+                    createGame();
+                }
             }
         });
 
@@ -56,28 +62,25 @@ module.exports = (io) =>{
         }
 
         function createGame(){
+            console.log('Creando partida');
+
+            const defaultWorld = initialWorld.createInitialWorld();
+            const defaultLocations = initialLocations.createInitialLocations();
+            
+            const defaultPlayer1 = initialPlayer.createInitialPlayer();
+            const defaultPlayer2 = initialPlayer.createInitialPlayer();
+
             const defaultGameValues = {
-                id: 0,  //id of the match/game
-                name: 'World 01',
-                player: {
-                    id: 0,
-                    deck: deckMock,
-                    hand: [card1Mock, card2Mock, card3Mock],
-                    mana: 1,
-                    name: 'Ramon'
-                },
-                oponent: {
-                    id: 0,
-                    deck: deckMock,
-                    hand: [card1Mock, card2Mock, card3Mock],
-                    mana: 1,
-                    name: 'Ramon'
-                },
-                locations: locationsMock,
-                turn: 1, // every new step sum + 1 as the mana
-                maxTurns: 6,
+                id: defaultWorld.id,  //id of the match/game
+                name: defaultWorld.name,
+                player1: defaultPlayer1,
+                oponent: defaultPlayer2,
+                locations: defaultLocations,
+                turn: defaultWorld.turn, // every new step sum + 1 as the mana
+                maxTurns: defaultWorld.maxTurns,
             };
 
+            console.log("🚀 ~ file: sockets.js:78 ~ createGame ~ defaultGameValues", defaultGameValues)
             io.sockets.emit('newGame', defaultGameValues);
         }
 
