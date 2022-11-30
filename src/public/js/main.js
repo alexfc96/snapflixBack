@@ -44,7 +44,7 @@ $(function(){
     nickForm.submit( e =>{
         e.preventDefault();
         console.log('Enviando...');
-        socket.emit('new user', nickName.val(), datos =>{
+        socket.emit('new game', nickName.val(), datos =>{
             if(datos){
                 nick = nickName.val();
                 $('#nick-wrap').hide();

@@ -7,41 +7,43 @@ const initialPlayer = require('./initDefaultGameValues/initialPlayer')
 // 3. asignar deck y ubicaciones
 // 4. hacer lógica para recibir next step y que este calcule la suma total de las cartas y vuelva a enviar el deck sin las cartas jugadas
 // 5. una vez el turno 6 se complete hacer computo global y finalizar partida.
-// 6. crear diferentes sockets para partidas simultaneas 
+// 6. crear diferentes sockets para partidas simultaneas
 
 module.exports = (io) =>{
 
     let nickNames = [];
+    let gameValues = {};
 
     io.on('connection', socket =>{
         console.log('Nuevo jugador encontrado');
-        
-        socket.on('new user', (datos, callback) => {
-            //Nos devuelve el indice si el dato existe, es decir, si ya existe el nombre de usuario:
-            if(nickNames.indexOf(datos) != -1 || nickNames.length > 1){
+
+        socket.on('new game', (data, callback) => {
+            if(nickNames.indexOf(data) != -1 || nickNames.length > 1){
                 console.log("ya hay 2 jugadores en una partida.")
                 callback(false);
             }else{
-                //Si no existe le respondemos al cliente con true y agregamos el nuevo usuario:
                 callback(true);
-                socket.nickname = datos;
+                socket.nickname = data;
                 nickNames.push(socket.nickname);
-                //Enviamos al cliente el array de usuarios:
                 updateUsers();
+
+                // if there are two players then start the game
                 if(nickNames.length == 2){
                     createGame();
                 }
             }
         });
 
-        //Al recibir un mensaje recojemos los datos
-        socket.on('enviar mensaje', (datos) =>{
-            //console.log(datos);
-            //Lo enviamos a todos los usuarios (clientes)
-            io.sockets.emit('nuevo mensaje', {
-                msg: datos,
-                nick: socket.nickname
-            });
+        socket.on('next step', (data) =>{
+            // receive data and compare on function the difference between the last step and the newest
+
+            // sum and rest the new points to every player
+
+            // resend total object
+            // io.sockets.emit('nuevo mensaje', {
+            //     msg: data,
+            //     nick: socket.nickname
+            // });
         });
 
         socket.on('disconnect', datos =>{
@@ -66,11 +68,11 @@ module.exports = (io) =>{
 
             const defaultWorld = initialWorld.createInitialWorld();
             const defaultLocations = initialLocations.createInitialLocations();
-            
+
             const defaultPlayer1 = initialPlayer.createInitialPlayer1();
             const defaultPlayer2 = initialPlayer.createInitialPlayer2();
 
-            const defaultGameValues = {
+            gameValues = {
                 id: defaultWorld.id,  //id of the match/game
                 name: defaultWorld.name,
                 player1: defaultPlayer1,
@@ -80,8 +82,10 @@ module.exports = (io) =>{
                 maxTurns: defaultWorld.maxTurns,
             };
 
-            console.log("🚀 ~ file: sockets.js:78 ~ createGame ~ defaultGameValues", defaultGameValues)
-            io.sockets.emit('newGame', defaultGameValues);
+            console.log("🚀 ~ file: sockets.js:78 ~ createGame ~ defaultGameValues", gameValues)
+            io.sockets.emit('new game created', gameValues);
+
+            return
         }
 
     });
