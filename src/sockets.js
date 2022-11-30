@@ -67,8 +67,8 @@ module.exports = (io) =>{
             const defaultWorld = initialWorld.createInitialWorld();
             const defaultLocations = initialLocations.createInitialLocations();
             
-            const defaultPlayer1 = initialPlayer.createInitialPlayer();
-            const defaultPlayer2 = initialPlayer.createInitialPlayer();
+            const defaultPlayer1 = initialPlayer.createInitialPlayer1();
+            const defaultPlayer2 = initialPlayer.createInitialPlayer2();
 
             const defaultGameValues = {
                 id: defaultWorld.id,  //id of the match/game
